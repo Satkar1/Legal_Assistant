@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LexiBot - AI Legal Assistant</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .hero {
+            text-align: center;
+            color: white;
+            padding: 4rem 0;
+        }
+        
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+        
+        .hero p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 3rem 0;
+        }
+        
+        .feature-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .feature-card h3 {
+            color: #667eea;
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+        }
+        
+        .api-status {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            margin: 2rem 0;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .status-item:last-child {
+            border-bottom: none;
+        }
+        
+        .status-indicator {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+        
+        .status-ok {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status-error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .status-loading {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .btn {
+            background: #667eea;
+            color: white;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn:hover {
+            background: #5a6fd8;
+        }
+        
+        .footer {
+            text-align: center;
+            color: white;
+            opacity: 0.8;
+            margin-top: 3rem;
+        }
+    </style>
+</head>
+<body>
+    <div id="root">
+        <div class="container">
+            <div class="hero">
+                <h1>🏛️ LexiBot</h1>
+                <p>AI-Powered Legal Assistant for Everyone</p>
+                <p>Democratizing access to justice through technology</p>
+            </div>
+            
+            <div class="features">
+                <div class="feature-card">
+                    <h3>🤖 AI Legal Chat</h3>
+                    <p>Get instant legal guidance in multiple languages. Our AI assistant helps you understand complex legal concepts in simple terms.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <h3>📋 FIR Generator</h3>
+                    <p>Automatically generate First Information Reports with proper legal formatting and language.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <h3>📊 Case Tracker</h3>
+                    <p>Keep track of your legal cases, important dates, and document management in one place.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <h3>👨‍⚖️ Lawyer Directory</h3>
+                    <p>Find qualified lawyers in your area with specialization filters and contact information.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <h3>📚 Legal Library</h3>
+                    <p>Access comprehensive legal glossary and resources in multiple Indian languages.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <h3>🌐 Multi-Language</h3>
+                    <p>Available in English, Hindi, and Marathi with more languages coming soon.</p>
+                </div>
+            </div>
+            
+            <div class="api-status">
+                <h3>System Status</h3>
+                <div id="api-status-content">
+                    <div class="status-item">
+                        <span>API Health</span>
+                        <span class="status-indicator status-loading">Checking...</span>
+                    </div>
+                    <div class="status-item">
+                        <span>Lawyer Directory</span>
+                        <span class="status-indicator status-loading">Checking...</span>
+                    </div>
+                    <div class="status-item">
+                        <span>Legal Glossary</span>
+                        <span class="status-indicator status-loading">Checking...</span>
+                    </div>
+                    <div class="status-item">
+                        <span>Authentication</span>
+                        <span class="status-indicator status-loading">Checking...</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="text-align: center;">
+                <a href="#" class="btn" onclick="checkAPIs()">Refresh Status</a>
+            </div>
+            
+            <div class="footer">
+                <p>&copy; 2025 LexiBot - Empowering Justice Through Technology</p>
+                <p>Built with ❤️ for accessible legal assistance</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function checkAPI(endpoint, name) {
+            try {
+                const response = await fetch(endpoint);
+                const data = await response.json();
+                return { name, status: 'ok', data };
+            } catch (error) {
+                return { name, status: 'error', error: error.message };
+            }
+        }
+
+        async function checkAPIs() {
+            const endpoints = [
+                { endpoint: '/api/health', name: 'API Health' },
+                { endpoint: '/api/lawyers', name: 'Lawyer Directory' },
+                { endpoint: '/api/glossary-terms', name: 'Legal Glossary' },
+                { endpoint: '/api/auth/user', name: 'Authentication' }
+            ];
+
+            for (const { endpoint, name } of endpoints) {
+                const result = await checkAPI(endpoint, name);
+                updateStatus(name, result.status);
+            }
+        }
+
+        function updateStatus(name, status) {
+            const statusItems = document.querySelectorAll('.status-item');
+            statusItems.forEach(item => {
+                const span = item.querySelector('span');
+                if (span && span.textContent === name) {
+                    const indicator = item.querySelector('.status-indicator');
+                    indicator.className = `status-indicator status-${status}`;
+                    indicator.textContent = status === 'ok' ? 'Online' : 
+                                          status === 'error' ? 'Offline' : 
+                                          name === 'Authentication' && status === 'error' ? 'Ready (401 Expected)' : 'Unknown';
+                }
+            });
+        }
+
+        // Check APIs on page load
+        window.addEventListener('load', () => {
+            setTimeout(checkAPIs, 1000);
+        });
+    </script>
+</body>
+</html>
