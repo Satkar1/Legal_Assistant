@@ -1,5 +1,11 @@
+flask
+flask-cors
+gunicorn
 pandas
-faiss-cpu
 numpy
+faiss-cpu
+python-dotenv
 openai
-
+supabase
+reportlab
+sentence-transformers
