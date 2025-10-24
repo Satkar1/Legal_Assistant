@@ -16,7 +16,6 @@
         gap: 1rem;
         margin-top: 1rem;
     }
-
     .stat-card {
         background: #fff;
         border-radius: 12px;
@@ -25,22 +24,18 @@
         text-align: center;
         transition: 0.3s;
     }
-
     .stat-card:hover {
         transform: translateY(-5px);
     }
-
     .stat-card h3 {
         margin-bottom: 0.5rem;
         color: #555;
     }
-
     .stat-card .stat-value {
         font-size: 1.6rem;
         font-weight: bold;
         color: #1976d2;
     }
-
     .chart-section {
         display: flex;
         flex-wrap: wrap;
@@ -48,19 +43,16 @@
         margin-top: 2rem;
         justify-content: space-around;
     }
-
     canvas {
         max-width: 400px;
         max-height: 300px;
     }
-
     
     .analytics-controls {
         display: flex;
         gap: 0.5rem;
         align-items: center;
     }
-
     .btn-export {
         background: #1976d2;
         color: white;
@@ -76,14 +68,12 @@
     .btn-export:hover {
         background: #1565c0;
     }
-
     .chart-section {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
         gap: 2rem;
         margin-top: 2rem;
     }
-
     .match-card {
     background: #f8f9fb;
     border: 1px solid #ddd;
@@ -138,14 +128,12 @@
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
-
 .resources-grid {
   display: flex;
   flex-direction: column;
   gap: 1rem;
   padding: 1rem;
 }
-
 .resource-card {
   background: #fff;
   border-radius: 10px;
@@ -168,7 +156,6 @@
   line-height: 1.5;
   color: #333;
 }
-
 .loading-state {
   text-align: center;
   padding: 2rem;
@@ -185,7 +172,6 @@
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
-
 .modal {
   position: fixed;
   inset: 0;
@@ -235,9 +221,6 @@
   max-height: 420px;
   overflow: auto;
 }
-
-
-
 .case-card {
   background: #fff;
   border-radius: 8px;
@@ -266,7 +249,6 @@
     gap: 6px;
     align-items: center;
 }
-
 .mic-btn {
     padding: 8px 12px;
     border: none;
@@ -276,17 +258,14 @@
     color: white;
     font-size: 16px;
 }
-
 .mic-btn.recording {
     background: red; /* change to red when recording */
 }
-
 .voice-status {
     font-size: 12px;
     color: red;
     margin-top: 4px;
 }
-
 /* === FIR Step 3: Legal Section Prediction Styling === */
 .sections-container {
   background: #ffffff;
@@ -296,7 +275,6 @@
   margin-top: 1rem;
   box-shadow: 0 2px 8px rgba(0,0,0,0.05);
 }
-
 .loading-sections {
   text-align: center;
   padding: 1.5rem;
@@ -307,7 +285,6 @@
   color: #1976d2;
   animation: spin 1s linear infinite;
 }
-
 .section-card {
   background: #f9fafc;
   border: 1px solid #ddd;
@@ -347,7 +324,6 @@
 .section-card button:hover {
   background: #0d47a1;
 }
-
 .selected-sections-container {
   background: #f0f6ff;
   border: 1px solid #bbdefb;
@@ -368,7 +344,6 @@
   font-size: 13px;
   margin: 3px;
 }
-
 /* === FIR Step 4: Review & Submit Styling === */
 .review-section {
   background: #ffffff;
@@ -409,13 +384,11 @@
   color: #555;
   margin-bottom: 1rem;
 }
-
 .step-actions {
   display: flex;
   justify-content: space-between;
   margin-top: 1.5rem;
 }
-
 /* Button Consistency */
 .step-btn {
   background: #1976d2;
@@ -437,16 +410,6 @@
 .step-btn.outline:hover {
   background: #e3f2fd;
 }
-
-
-
-
-
-
-
-
-
-
 /* Enhanced Analytics Styling */
 .analytics-grid {
     display: grid;
@@ -454,7 +417,6 @@
     gap: 1.5rem;
     margin: 1.5rem 0;
 }
-
 .analytics-card {
     background: #fff;
     border-radius: 12px;
@@ -462,7 +424,6 @@
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     border: 1px solid #e0e0e0;
 }
-
 .analytics-card h3 {
     color: #1a237e;
     margin-bottom: 1rem;
@@ -470,14 +431,12 @@
     border-bottom: 2px solid #e3f2fd;
     padding-bottom: 0.5rem;
 }
-
 .stats-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
     gap: 1rem;
     margin-bottom: 1.5rem;
 }
-
 .stat-item {
     text-align: center;
     padding: 1rem;
@@ -486,53 +445,45 @@
     border-left: 4px solid #1976d2;
     position: relative;
 }
-
 .stat-value {
     font-size: 1.8rem;
     font-weight: bold;
     color: #1976d2;
     display: block;
 }
-
 .stat-label {
     font-size: 0.9rem;
     color: #666;
     margin-top: 0.5rem;
 }
-
 .trend-indicator {
     position: absolute;
     top: 8px;
     right: 8px;
     font-size: 0.7rem;
 }
-
 .trend-up {
     background: #e8f5e8;
     color: #2e7d32;
     padding: 2px 6px;
     border-radius: 8px;
 }
-
 .trend-down {
     background: #ffebee;
     color: #c62828;
     padding: 2px 6px;
     border-radius: 8px;
 }
-
 .chart-container {
     position: relative;
     height: 250px;
     margin: 1rem 0;
 }
-
 .insights-list {
     display: flex;
     flex-direction: column;
     gap: 0.8rem;
 }
-
 .insight-item {
     display: flex;
     align-items: flex-start;
@@ -542,12 +493,10 @@
     border-radius: 8px;
     border-left: 3px solid #1976d2;
 }
-
 .insight-item i {
     color: #1976d2;
     margin-top: 0.2rem;
 }
-
 .hotspot-item {
     display: flex;
     justify-content: space-between;
@@ -558,56 +507,47 @@
     border-radius: 8px;
     border-left: 4px solid #ff9800;
 }
-
 .location-info {
     display: flex;
     align-items: center;
     gap: 0.5rem;
 }
-
 .location-stats {
     display: flex;
     align-items: center;
     gap: 0.8rem;
 }
-
 .count {
     font-weight: bold;
     color: #333;
 }
-
 .risk-badge {
     padding: 0.3rem 0.8rem;
     border-radius: 20px;
     font-size: 0.8rem;
     font-weight: bold;
 }
-
 .risk-high { background: #ffebee; color: #c62828; }
 .risk-medium { background: #fff3e0; color: #ef6c00; }
 .risk-low { background: #e8f5e8; color: #2e7d32; }
-
 .comparison-stats {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 1rem;
     margin: 1rem 0;
 }
-
 .comparison-item {
     text-align: center;
     padding: 1rem;
     background: #f8f9fa;
     border-radius: 8px;
 }
-
 .time-filter {
     display: flex;
     gap: 0.5rem;
     align-items: center;
     margin-bottom: 1rem;
 }
-
 .time-filter-btn {
     padding: 0.5rem 1rem;
     border: 1px solid #ddd;
@@ -617,23 +557,19 @@
     transition: all 0.3s ease;
     font-size: 0.9rem;
 }
-
 .time-filter-btn.active {
     background: #1976d2;
     color: white;
     border-color: #1976d2;
 }
-
 .time-filter-btn:hover:not(.active) {
     background: #f5f5f5;
 }
-
 .export-options {
     display: flex;
     gap: 0.5rem;
     margin-left: auto;
 }
-
 .btn-export {
     background: #1976d2;
     color: white;
@@ -647,11 +583,9 @@
     font-size: 0.9rem;
     transition: background 0.3s ease;
 }
-
 .btn-export:hover {
     background: #1565c0;
 }
-
 .loading-state {
     display: flex;
     flex-direction: column;
@@ -660,7 +594,6 @@
     padding: 3rem;
     color: #666;
 }
-
 .loading-state .spinner {
     width: 40px;
     height: 40px;
@@ -670,24 +603,19 @@
     animation: spin 1s linear infinite;
     margin-bottom: 1rem;
 }
-
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
-
 .error-state {
     text-align: center;
     padding: 2rem;
     color: #d32f2f;
 }
-
 .error-state i {
     font-size: 3rem;
     margin-bottom: 1rem;
 }
-
-
     </style>
 
     
