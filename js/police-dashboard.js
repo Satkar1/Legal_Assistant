@@ -210,7 +210,7 @@ class PoliceDashboard {
 
 async loadAnalyticsDirect() {
     try {
-        const response = await fetch('/api/police/analytics?range=month');
+        const response = await fetch('http://localhost:5001/api/police/analytics?range=month');
         const data = await response.json();
         
         if (data.success && data.analytics) {
@@ -1087,7 +1087,7 @@ async function viewCaseDetails(firNumber) {
         if (document.getElementById('modalCaseDetails')) document.getElementById('modalCaseDetails').innerHTML = `<p>Loading case.</p>`;
         if (document.getElementById('modalTimeline')) document.getElementById('modalTimeline').innerHTML = `<p>Loading timeline.</p>`;
 
-        const resp = await fetch('/api/police/cases/${encodeURIComponent(firNumber)}`);
+        const resp = await fetch(`http://localhost:5001/api/police/cases/${encodeURIComponent(firNumber)}`);
         const data = await resp.json();
 
         if (!data.success) {
@@ -1170,7 +1170,7 @@ async function quickUpdateCase(firNumber) {
 
     // fallback: direct PUT to API
     try {
-        const resp = await fetch('/api/police/cases/${encodeURIComponent(firNumber)}/status`, {
+        const resp = await fetch(`http://localhost:5001/api/police/cases/${encodeURIComponent(firNumber)}/status`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ status: newStatus, notes: 'Quick update via Update button' })
@@ -1206,7 +1206,7 @@ document.addEventListener('click', function(e){
 
         (async () => {
             try {
-                const resp = await fetch('/api/police/cases/${encodeURIComponent(fir)}/status`, {
+                const resp = await fetch(`http://localhost:5001/api/police/cases/${encodeURIComponent(fir)}/status`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ status: newStatus, notes: notes })
@@ -1244,7 +1244,7 @@ document.addEventListener('click', function(e){
 
         (async () => {
             try {
-                const resp = await fetch('/api/police/cases/${encodeURIComponent(fir)}/notes`, {
+                const resp = await fetch(`http://localhost:5001/api/police/cases/${encodeURIComponent(fir)}/notes`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -1300,7 +1300,7 @@ async function findCriminalMatches() {
         </div>`;
 
     try {
-        const response = await fetch('/api/police/criminal-matching", {
+        const response = await fetch("http://localhost:5001/api/police/criminal-matching", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ description: query })
@@ -1569,7 +1569,7 @@ async function generateAnalytics() {
     resultDiv.style.display = "none";
 
     try {
-        const response = await fetch('/api/police/analytics?range=${range}`);
+        const response = await fetch(`http://localhost:5001/api/police/analytics?range=${range}`);
         const data = await response.json();
 
         if (!data.success || !data.analytics) {
@@ -1729,8 +1729,6 @@ function closeCaseModal() {
 document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') closeCaseModal();
 });
-
-
 
 
 
