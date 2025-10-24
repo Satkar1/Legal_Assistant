@@ -2,7 +2,7 @@
 
 class CaseManager {
     constructor() {
-        this.apiBase = 'http://localhost:5001/api/police';
+        this.apiBase = '/api/police';
         this.initDelegation();
     }
 
@@ -251,3 +251,4 @@ class CaseManager {
 
 // export global instance
 window.caseManager = new CaseManager();
+
