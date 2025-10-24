@@ -59,7 +59,7 @@
                 </form>
                 
                 <div class="register-link">
-                    Don’t have an account? <a href="registration.html">Register here</a>
+                    Don't have an account? <a href="registration.html">Register here</a>
                 </div>
 
                 <!-- Message section -->
@@ -72,7 +72,6 @@
         <p>&copy; 2024 AI Legal Assistance System. Developed as part of Bachelor of Technology in Computer Engineering.</p>
     </footer>
 
-    
     <script>
         document.getElementById('loginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
@@ -99,7 +98,10 @@
             messageDiv.innerHTML = '';
 
             try {
-                const response = await fetch('http://localhost:5000/api/login', {
+                console.log('🔄 Attempting login...');
+                
+                // ✅ FIXED: Use relative URL instead of hardcoded localhost
+                const response = await fetch('/api/login', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -107,36 +109,63 @@
                     body: JSON.stringify(formData)
                 });
 
+                console.log('📨 Login response status:', response.status);
+
                 const result = await response.json();
+                console.log('📨 Login response data:', result);
 
                 if (response.ok) {
                     // ✅ Success
                     messageDiv.innerHTML = `<p style="color: green;">${result.message}</p>`;
                     
-                    // Store user info locally (optional)
+                    // Store user info locally
                     localStorage.setItem('userRole', result.role);
                     localStorage.setItem('userName', result.user.full_name);
                     localStorage.setItem('userEmail', result.user.email);
 
                     // Redirect based on role
                     setTimeout(() => {
-                        window.location.href = result.redirect || 
+                        const redirectUrl = result.redirect || 
                             (result.role === 'police' ? 'police-dashboard.html' : 'citizen-dashboard.html');
+                        console.log('🔄 Redirecting to:', redirectUrl);
+                        window.location.href = redirectUrl;
                     }, 1000);
                 } else {
                     // ❌ Error cases (role mismatch, unverified, wrong password)
                     messageDiv.innerHTML = `<p style="color: red;">${result.error}</p>`;
                 }
             } catch (error) {
-                console.error('Login error:', error);
-                messageDiv.innerHTML = '<p style="color: red;">Login failed. Please try again later.</p>';
+                console.error('💥 Login error:', error);
+                messageDiv.innerHTML = '<p style="color: red;">Login failed. Please check if the server is running and try again.</p>';
+                console.log('💡 Debug info - Current API_CONFIG:', window.API_CONFIG);
             } finally {
                 submitBtn.disabled = false;
                 submitBtn.textContent = 'Login';
             }
         });
+
+        // Debug helper - check if config is loaded
+        console.log('🔍 Login page loaded');
+        console.log('API_CONFIG available:', typeof window.API_CONFIG !== 'undefined');
+        if (window.API_CONFIG) {
+            console.log('BASE_URL:', window.API_CONFIG.BASE_URL);
+        }
+
+        // Test the API connection
+        window.addEventListener('load', function() {
+            console.log('🧪 Testing API connection...');
+            fetch('/api/health')
+                .then(response => {
+                    console.log('✅ API Health Check Status:', response.status);
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('✅ API Health Response:', data);
+                })
+                .catch(error => {
+                    console.error('❌ API Health Check Failed:', error);
+                });
+        });
     </script>
 </body>
 </html>
-
-
