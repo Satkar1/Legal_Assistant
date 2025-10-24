@@ -1,7 +1,8 @@
 // fir-search.js - FIR Search and Management
 class FIRSearch {
     constructor() {
-        this.apiUrl = 'http://localhost:5001/api/fir';
+        this.apiUrl = '/api/fir';
+        
         this.currentPage = 1;
         this.pageSize = 10;
         this.currentFilters = {};
@@ -117,4 +118,5 @@ class FIRSearch {
 }
 
 // Initialize FIR Search
+
 const firSearch = new FIRSearch();
