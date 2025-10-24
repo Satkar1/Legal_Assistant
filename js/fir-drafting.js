@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // FIR API endpoint
-    const FIR_API_URL = 'http://localhost:5001/api/fir';
+    const FIR_API_URL = '/api/fir';
     
     let currentStep = 1;
     let suggestedSections = [];
@@ -632,4 +632,5 @@ function populateReviewData() {
     if (prevStep4Btn) prevStep4Btn.addEventListener('click', () => goToStep(3));
     if (submitFIRBtn) submitFIRBtn.addEventListener('click', submitFIR);
     if (resetFormBtn) resetFormBtn.addEventListener('click', resetForm);
+
 });
