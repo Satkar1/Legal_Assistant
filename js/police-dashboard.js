@@ -1,8 +1,8 @@
-// Police Dashboard Main Controller - COMPLETE VERSION
+// Police Dashboard Main Controller - COMPLETE VERSION (URLs Fixed)
 class PoliceDashboard {
     constructor() {
         this.currentTab = 'draft-fir';
-        this.apiBase = 'http://localhost:5001/api/police';
+        this.apiBase = '/api/police'; // ✅ Fixed: Relative URL
         this.init();
     }
 
@@ -51,7 +51,7 @@ class PoliceDashboard {
             });
         }
 
-                // Case Management tab filter buttons
+        // Case Management tab filter buttons
         document.querySelectorAll('.tab-filter').forEach(button => {
             button.addEventListener('click', () => {
                 const filter = button.dataset.filter;
@@ -70,7 +70,6 @@ class PoliceDashboard {
                 }
             });
         });
-
     }
 
     showTab(tabName) {
@@ -115,11 +114,6 @@ class PoliceDashboard {
         this.currentTab = tabName;
     }
 
-
-
-    
-
-
     // add this method inside the PoliceDashboard class
     escapeHtml(str) {
         if (str === null || str === undefined) return '';
@@ -131,7 +125,6 @@ class PoliceDashboard {
             .replace(/'/g, '&#39;');
     }
 
-
     async loadTabData(tabName) {
         try {
             switch(tabName) {
@@ -140,9 +133,9 @@ class PoliceDashboard {
                     break;
 
                 case 'crime-analytics':
-                console.log('🔄 Loading crime analytics tab...');
-                await this.loadEnhancedAnalytics();
-                break;
+                    console.log('🔄 Loading crime analytics tab...');
+                    await this.loadEnhancedAnalytics();
+                    break;
 
                 case 'analytics':
                     await this.loadAnalytics();
@@ -168,204 +161,182 @@ class PoliceDashboard {
         }
     }
 
-
-
-
-
-
-
-
-
-
     async loadEnhancedAnalytics() {
-    try {
-        // Show loading state
+        try {
+            // Show loading state
+            const loading = document.getElementById('analyticsLoading');
+            const results = document.getElementById('analyticsResults');
+            
+            if (loading) loading.style.display = 'flex';
+            if (results) results.style.display = 'none';
+
+            // Try to use enhanced analytics if available
+            if (window.enhancedAnalytics && typeof window.enhancedAnalytics.initialize === 'function') {
+                console.log('✅ Using enhanced analytics');
+                await window.enhancedAnalytics.initialize();
+            } 
+            // Fallback to basic analytics
+            else if (window.analyticsDashboard && typeof window.analyticsDashboard.generateAnalytics === 'function') {
+                console.log('🔄 Using basic analytics as fallback');
+                await window.analyticsDashboard.generateAnalytics();
+            }
+            // Ultimate fallback - direct API call
+            else {
+                console.log('📊 Using direct API fallback');
+                await this.loadAnalyticsDirect();
+            }
+        } catch (error) {
+            console.error('Error in loadEnhancedAnalytics:', error);
+            // Ultimate fallback - show sample data
+            this.showSampleAnalytics();
+        }
+    }
+
+    async loadAnalyticsDirect() {
+        try {
+            const response = await fetch('/api/police/analytics?range=month'); // ✅ Fixed: Relative URL
+            const data = await response.json();
+            
+            if (data.success && data.analytics) {
+                this.displayBasicAnalytics(data.analytics);
+            } else {
+                this.showSampleAnalytics();
+            }
+        } catch (error) {
+            console.error('Direct API call failed:', error);
+            this.showSampleAnalytics();
+        }
+    }
+
+    displayBasicAnalytics(analytics) {
+        const container = document.getElementById('analyticsResults');
+        if (!container) return;
+
+        container.innerHTML = `
+            <div class="analytics-card">
+                <h3>📊 Crime Analytics</h3>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <span class="stat-value">${analytics.total_cases || 0}</span>
+                        <span class="stat-label">Total Cases</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value">${analytics.resolved_cases || 0}</span>
+                        <span class="stat-label">Resolved</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value">${analytics.resolution_rate || 0}%</span>
+                        <span class="stat-label">Resolution Rate</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value">${analytics.pending_cases || 0}</span>
+                        <span class="stat-label">Pending</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="analytics-grid">
+                <div class="analytics-card">
+                    <h3>📈 Crime Types</h3>
+                    <div class="chart-container">
+                        <canvas id="basicCrimeTypeChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="analytics-card">
+                    <h3>📍 Top Locations</h3>
+                    <div class="hotspots-list">
+                        ${Object.entries(analytics.hotspots || {}).slice(0, 5).map(([location, count]) => `
+                            <div class="hotspot-item">
+                                <div class="location-info">
+                                    <i class="material-icons">location_on</i>
+                                    <span>${location}</span>
+                                </div>
+                                <div class="location-stats">
+                                    <span class="count">${count} cases</span>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Create basic chart
+        this.createBasicChart(analytics.crime_types);
+        
+        // Hide loading
+        this.hideAnalyticsLoading();
+    }
+
+    showSampleAnalytics() {
+        const sampleData = {
+            total_cases: 167,
+            resolved_cases: 94,
+            pending_cases: 73,
+            resolution_rate: 56.3,
+            crime_types: {
+                'Theft': 52,
+                'Assault': 38,
+                'Fraud': 31,
+                'Cybercrime': 26,
+                'Robbery': 15,
+                'Other': 5
+            },
+            hotspots: {
+                'Downtown Area': 42,
+                'Shopping District': 35,
+                'Residential Zone': 28,
+                'Industrial Area': 22,
+                'Park Area': 18
+            }
+        };
+        
+        this.displayBasicAnalytics(sampleData);
+    }
+
+    createBasicChart(crimeTypes = {}) {
+        const ctx = document.getElementById('basicCrimeTypeChart');
+        if (!ctx) return;
+
+        const labels = Object.keys(crimeTypes);
+        const data = Object.values(crimeTypes);
+
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Cases',
+                    data: data,
+                    backgroundColor: '#1976d2',
+                    borderRadius: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                }
+            }
+        });
+    }
+
+    hideAnalyticsLoading() {
         const loading = document.getElementById('analyticsLoading');
         const results = document.getElementById('analyticsResults');
         
-        if (loading) loading.style.display = 'flex';
-        if (results) results.style.display = 'none';
-
-        // Try to use enhanced analytics if available
-        if (window.enhancedAnalytics && typeof window.enhancedAnalytics.initialize === 'function') {
-            console.log('✅ Using enhanced analytics');
-            await window.enhancedAnalytics.initialize();
-        } 
-        // Fallback to basic analytics
-        else if (window.analyticsDashboard && typeof window.analyticsDashboard.generateAnalytics === 'function') {
-            console.log('🔄 Using basic analytics as fallback');
-            await window.analyticsDashboard.generateAnalytics();
-        }
-        // Ultimate fallback - direct API call
-        else {
-            console.log('📊 Using direct API fallback');
-            await this.loadAnalyticsDirect();
-        }
-    } catch (error) {
-        console.error('Error in loadEnhancedAnalytics:', error);
-        // Ultimate fallback - show sample data
-        this.showSampleAnalytics();
+        if (loading) loading.style.display = 'none';
+        if (results) results.style.display = 'block';
     }
-}
-
-async loadAnalyticsDirect() {
-    try {
-        const response = await fetch('http://localhost:5001/api/police/analytics?range=month');
-        const data = await response.json();
-        
-        if (data.success && data.analytics) {
-            this.displayBasicAnalytics(data.analytics);
-        } else {
-            this.showSampleAnalytics();
-        }
-    } catch (error) {
-        console.error('Direct API call failed:', error);
-        this.showSampleAnalytics();
-    }
-}
-
-displayBasicAnalytics(analytics) {
-    const container = document.getElementById('analyticsResults');
-    if (!container) return;
-
-    container.innerHTML = `
-        <div class="analytics-card">
-            <h3>📊 Crime Analytics</h3>
-            <div class="stats-grid">
-                <div class="stat-item">
-                    <span class="stat-value">${analytics.total_cases || 0}</span>
-                    <span class="stat-label">Total Cases</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-value">${analytics.resolved_cases || 0}</span>
-                    <span class="stat-label">Resolved</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-value">${analytics.resolution_rate || 0}%</span>
-                    <span class="stat-label">Resolution Rate</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-value">${analytics.pending_cases || 0}</span>
-                    <span class="stat-label">Pending</span>
-                </div>
-            </div>
-        </div>
-
-        <div class="analytics-grid">
-            <div class="analytics-card">
-                <h3>📈 Crime Types</h3>
-                <div class="chart-container">
-                    <canvas id="basicCrimeTypeChart"></canvas>
-                </div>
-            </div>
-            
-            <div class="analytics-card">
-                <h3>📍 Top Locations</h3>
-                <div class="hotspots-list">
-                    ${Object.entries(analytics.hotspots || {}).slice(0, 5).map(([location, count]) => `
-                        <div class="hotspot-item">
-                            <div class="location-info">
-                                <i class="material-icons">location_on</i>
-                                <span>${location}</span>
-                            </div>
-                            <div class="location-stats">
-                                <span class="count">${count} cases</span>
-                            </div>
-                        </div>
-                    `).join('')}
-                </div>
-            </div>
-        </div>
-    `;
-
-    // Create basic chart
-    this.createBasicChart(analytics.crime_types);
-    
-    // Hide loading
-    this.hideAnalyticsLoading();
-}
-
-showSampleAnalytics() {
-    const sampleData = {
-        total_cases: 167,
-        resolved_cases: 94,
-        pending_cases: 73,
-        resolution_rate: 56.3,
-        crime_types: {
-            'Theft': 52,
-            'Assault': 38,
-            'Fraud': 31,
-            'Cybercrime': 26,
-            'Robbery': 15,
-            'Other': 5
-        },
-        hotspots: {
-            'Downtown Area': 42,
-            'Shopping District': 35,
-            'Residential Zone': 28,
-            'Industrial Area': 22,
-            'Park Area': 18
-        }
-    };
-    
-    this.displayBasicAnalytics(sampleData);
-}
-
-createBasicChart(crimeTypes = {}) {
-    const ctx = document.getElementById('basicCrimeTypeChart');
-    if (!ctx) return;
-
-    const labels = Object.keys(crimeTypes);
-    const data = Object.values(crimeTypes);
-
-    new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: labels,
-            datasets: [{
-                label: 'Cases',
-                data: data,
-                backgroundColor: '#1976d2',
-                borderRadius: 8
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { display: false }
-            }
-        }
-    });
-}
-
-hideAnalyticsLoading() {
-    const loading = document.getElementById('analyticsLoading');
-    const results = document.getElementById('analyticsResults');
-    
-    if (loading) loading.style.display = 'none';
-    if (results) results.style.display = 'block';
-}
-
-
-
-
-
-
-
-
-
-
 
     async loadCaseManagement() {
-    // Load both pending cases and case updates together
+        // Load both pending cases and case updates together
         await Promise.all([
             this.loadPendingCases(),
             this.loadCaseUpdates()
         ]);
-
-    // Optionally, preload all cases list
-    // this.loadAllCases(1, 10);
     }
 
     async loadAllCases(page = 1, limit = 10) {
@@ -382,7 +353,7 @@ hideAnalyticsLoading() {
             loader.style.display = "flex";
             content.style.display = "none";
 
-            const response = await fetch(`http://localhost:5001/api/fir/list?page=${page}&limit=${limit}`);
+            const response = await fetch(`/api/fir/list?page=${page}&limit=${limit}`); // ✅ Fixed: Relative URL
             const data = await response.json();
 
             loader.style.display = "none";
@@ -408,9 +379,6 @@ hideAnalyticsLoading() {
             if (content) content.innerHTML = `<p class="error">Error loading all cases.</p>`;
         }
     }
-
-
-
 
     async loadDashboardOverview() {
         try {
@@ -470,9 +438,6 @@ hideAnalyticsLoading() {
         `).join('');
     }
 
-    // -------------------------
-// loadPendingCases (replacement)
-// -------------------------
     async loadPendingCases() {
         try {
             const loader = document.getElementById("casesLoading");
@@ -546,8 +511,6 @@ hideAnalyticsLoading() {
             if (content) content.innerHTML = `<p class="error">Error loading pending cases.</p>`;
         }
     }
-
-
 
     displayPendingCases(cases, filter = 'all') {
         // use the unified content container to render
@@ -625,7 +588,6 @@ hideAnalyticsLoading() {
         });
     }
 
-
     async loadCaseUpdates() {
         try {
             const loader = document.getElementById("casesLoading");
@@ -666,7 +628,6 @@ hideAnalyticsLoading() {
             if (content) content.innerHTML = `<p class="error">Error loading case updates.</p>`;
         }
     }
-
 
     displayCaseUpdates(updates) {
         const container = document.getElementById('casesContent');
@@ -709,7 +670,6 @@ hideAnalyticsLoading() {
         });
     }
 
-
     async loadAnalytics() {
         try {
             this.showLoading('analyticsResults', 'Fetching crime analytics...');
@@ -729,7 +689,6 @@ hideAnalyticsLoading() {
             this.showError('analyticsResults', 'Error loading analytics');
         }
     }
-
 
     displayAnalytics(analytics) {
         const container = document.getElementById('analyticsResults');
@@ -780,8 +739,6 @@ hideAnalyticsLoading() {
             </div>
         `;
     }
-
-
 
     async loadCriminalMatching() {
         try {
@@ -1016,7 +973,7 @@ hideAnalyticsLoading() {
 
     async updateSystemStatus() {
         try {
-            const response = await fetch('http://localhost:5001/api/fir/health');
+            const response = await fetch('/api/fir/health'); // ✅ Fixed: Relative URL
             const data = await response.json();
 
             const dbStatus = document.getElementById('dbStatus');
@@ -1087,7 +1044,7 @@ async function viewCaseDetails(firNumber) {
         if (document.getElementById('modalCaseDetails')) document.getElementById('modalCaseDetails').innerHTML = `<p>Loading case.</p>`;
         if (document.getElementById('modalTimeline')) document.getElementById('modalTimeline').innerHTML = `<p>Loading timeline.</p>`;
 
-        const resp = await fetch(`http://localhost:5001/api/police/cases/${encodeURIComponent(firNumber)}`);
+        const resp = await fetch(`/api/police/cases/${encodeURIComponent(firNumber)}`); // ✅ Fixed: Relative URL
         const data = await resp.json();
 
         if (!data.success) {
@@ -1170,7 +1127,7 @@ async function quickUpdateCase(firNumber) {
 
     // fallback: direct PUT to API
     try {
-        const resp = await fetch(`http://localhost:5001/api/police/cases/${encodeURIComponent(firNumber)}/status`, {
+        const resp = await fetch(`/api/police/cases/${encodeURIComponent(firNumber)}/status`, { // ✅ Fixed: Relative URL
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ status: newStatus, notes: 'Quick update via Update button' })
@@ -1193,7 +1150,6 @@ async function quickUpdateCase(firNumber) {
     }
 }
 
-
 // Install listeners for modal action buttons
 document.addEventListener('click', function(e){
     const target = e.target;
@@ -1206,7 +1162,7 @@ document.addEventListener('click', function(e){
 
         (async () => {
             try {
-                const resp = await fetch(`http://localhost:5001/api/police/cases/${encodeURIComponent(fir)}/status`, {
+                const resp = await fetch(`/api/police/cases/${encodeURIComponent(fir)}/status`, { // ✅ Fixed: Relative URL
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ status: newStatus, notes: notes })
@@ -1244,7 +1200,7 @@ document.addEventListener('click', function(e){
 
         (async () => {
             try {
-                const resp = await fetch(`http://localhost:5001/api/police/cases/${encodeURIComponent(fir)}/notes`, {
+                const resp = await fetch(`/api/police/cases/${encodeURIComponent(fir)}/notes`, { // ✅ Fixed: Relative URL
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -1271,14 +1227,9 @@ document.addEventListener('click', function(e){
     }
 });
 
-
-
-
-
 // 🔍 Criminal Pattern Matching Function
 // ===== Replace existing findCriminalMatches() with this code =====
-// === Criminal Matching Tab ===
-// --- Criminal Matching Tab Logic ---
+// === Criminal Matching Tab Logic ---
 async function findCriminalMatches() {
     const descriptionInput = document.getElementById("caseDescription");
     const resultsDiv = document.getElementById("matchingResults");
@@ -1300,7 +1251,7 @@ async function findCriminalMatches() {
         </div>`;
 
     try {
-        const response = await fetch("http://localhost:5001/api/police/criminal-matching", {
+        const response = await fetch("/api/police/criminal-matching", { // ✅ Fixed: Relative URL
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ description: query })
@@ -1343,8 +1294,6 @@ async function findCriminalMatches() {
             </div>`;
     }
 }
-
-
 
 // helper: render matches
 function displayCriminalMatches(matches = []) {
@@ -1393,7 +1342,7 @@ function displayCriminalMatches(matches = []) {
             if (!id) return alert('No profile id available');
             // simple profile fetch — uses backend /api/police/criminal/profiles if available
             try {
-                const resp = await fetch(`/api/police/criminal/profiles`);
+                const resp = await fetch(`/api/police/criminal/profiles`); // ✅ Fixed: Relative URL
                 const body = await resp.json();
                 if (body && body.success) {
                     const profile = (body.profiles || []).find(p => String(p.id) === String(id));
@@ -1412,9 +1361,6 @@ function displayCriminalMatches(matches = []) {
         });
     });
 }
-
-
-
 
 // === LEGAL RESOURCES (AI-Powered) ===
 async function searchLegalResources() {
@@ -1439,7 +1385,7 @@ async function searchLegalResources() {
       </div>`;
 
     try {
-        const res = await fetch("http://localhost:5000/api/chat", {
+        const res = await fetch("/api/chat", { // ✅ Fixed: Relative URL
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ message: query })
@@ -1479,17 +1425,9 @@ async function searchLegalResources() {
     }
 }
 
-
 function downloadTemplate(templateName) {
     alert(`Downloading ${templateName} template - Feature coming soon!`);
 }
-
-
-
-
-
-
-
 
 // === 🎤 Voice-to-Text for Incident Description ===
 let recognition;
@@ -1546,7 +1484,6 @@ if (window.SpeechRecognition) {
     document.getElementById('voiceStatus').innerText = '❌ Voice input not supported in this browser.';
 }
 
-
 // Initialize dashboard when page loads
 document.addEventListener('DOMContentLoaded', () => {
     window.policeDashboard = new PoliceDashboard();
@@ -1554,8 +1491,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Manual trigger for analytics report generation
 // -------------------- CRIME ANALYTICS --------------------
-// -------------------- CRIME ANALYTICS --------------------
-// -------------------- ENHANCED CRIME ANALYTICS --------------------
 let crimeTypeChart = null;
 let hotspotChart = null;
 let trendChart = null;
@@ -1569,7 +1504,7 @@ async function generateAnalytics() {
     resultDiv.style.display = "none";
 
     try {
-        const response = await fetch(`http://localhost:5001/api/police/analytics?range=${range}`);
+        const response = await fetch(`/api/police/analytics?range=${range}`); // ✅ Fixed: Relative URL
         const data = await response.json();
 
         if (!data.success || !data.analytics) {
@@ -1641,8 +1576,6 @@ async function generateAnalytics() {
                 scales: { y: { beginAtZero: true } },
             },
         });
-
-        
 
         loadingDiv.style.display = "none";
         resultDiv.style.display = "block";
@@ -1729,8 +1662,3 @@ function closeCaseModal() {
 document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') closeCaseModal();
 });
-
-
-
-
-
