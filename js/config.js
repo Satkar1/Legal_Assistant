@@ -1,7 +1,7 @@
 // Configuration for deployed environment
 const API_CONFIG = {
-  // Replace with your actual Hugging Face Space URL
-  BASE_URL: 'https://huggingface.co/spaces/S2004/police-dashboard',
+  // ✅ CORRECT: Use your Hugging Face Space URL (not profile URL)
+  BASE_URL: 'https://s2004-police-dashboard.hf.space',
   
   get FIR_API() {
     return `${this.BASE_URL}/api/fir`;
@@ -16,7 +16,7 @@ const API_CONFIG = {
   }
 };
 
-// Override fetch to use Hugging Face URL
+// Enhanced fetch override with better error handling
 const originalFetch = window.fetch;
 window.fetch = function(url, options = {}) {
   // Convert relative URLs to absolute
@@ -24,7 +24,9 @@ window.fetch = function(url, options = {}) {
     const baseUrl = API_CONFIG.BASE_URL;
     url = `${baseUrl}${url}`;
     
-    // Add CORS headers if needed
+    console.log(`🔄 API Call: ${url}`);
+    
+    // Add CORS headers
     options = options || {};
     options.mode = 'cors';
     options.credentials = 'omit';
@@ -33,9 +35,16 @@ window.fetch = function(url, options = {}) {
     if (!options.headers) {
       options.headers = {};
     }
-    options.headers['Content-Type'] = 'application/json';
+    if (!options.headers['Content-Type'] && (options.method === 'POST' || options.method === 'PUT')) {
+      options.headers['Content-Type'] = 'application/json';
+    }
   }
-  return originalFetch.call(this, url, options);
+  
+  return originalFetch.call(this, url, options)
+    .catch(error => {
+      console.error('🚨 Fetch Error:', error);
+      throw error;
+    });
 };
 
-console.log('✅ API Configuration loaded:', API_CONFIG.BASE_URL);
+console.log('✅ API Configuration loaded. Base URL:', API_CONFIG.BASE_URL);
