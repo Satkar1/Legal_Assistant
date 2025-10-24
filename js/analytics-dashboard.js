@@ -1,7 +1,7 @@
 // Enhanced Crime Analytics Dashboard - FIXED VERSION
 class EnhancedAnalyticsDashboard {
     constructor() {
-        this.apiBase = 'http://localhost:5001/api/police';
+        this.apiBase = '/api/police';
         this.charts = {};
         this.currentRange = 'month';
         this.analyticsData = null;
@@ -1032,4 +1032,5 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // Make sure the export function is globally available
+
 window.exportAnalytics = exportAnalytics;
