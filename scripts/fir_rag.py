@@ -3,10 +3,8 @@ import re
 import pickle
 import numpy as np
 import ssl
-import urllib.request
 from sentence_transformers import SentenceTransformer
-from google import genai
-from google.genai.types import GenerateContentConfig
+import google.generativeai as genai
 from dotenv import load_dotenv
 import pandas as pd
 
@@ -35,18 +33,26 @@ def make_json_safe(record: dict):
 
 class FIRRAGModel:
     def __init__(self, sections_csv_path):
-        self.sections_df = pd.read_csv(sections_csv_path)
+        try:
+            self.sections_df = pd.read_csv(sections_csv_path)
+        except Exception as e:
+            print(f"❌ Failed to load sections CSV: {e}")
+            # Create empty dataframe as fallback
+            self.sections_df = pd.DataFrame(columns=['section_number', 'section_title', 'description', 'punishment', 'example_use_cases'])
+        
         self.embedder = SentenceTransformer("all-MiniLM-L6-v2")
         
         # Initialize Gemini client with error handling
         try:
             api_key = os.getenv("GEMINI_API_KEY")
             if not api_key:
-                raise ValueError("GEMINI_API_KEY not found in environment variables")
-            
-            self.client = genai.Client(api_key=api_key)
-            self.gemini_available = True
-            print("✅ Gemini client initialized successfully")
+                print("⚠️ GEMINI_API_KEY not found in environment variables")
+                self.gemini_available = False
+            else:
+                genai.configure(api_key=api_key)
+                self.client = genai
+                self.gemini_available = True
+                print("✅ Gemini client initialized successfully")
         except Exception as e:
             print(f"❌ Gemini initialization failed: {e}")
             self.client = None
@@ -59,6 +65,10 @@ class FIRRAGModel:
         """Create a comprehensive knowledge base from sections data"""
         knowledge_items = []
         
+        if self.sections_df.empty:
+            print("⚠️ No sections data available")
+            return knowledge_items
+            
         for _, row in self.sections_df.iterrows():
             # Create multiple context variations for better matching
             item1 = f"IPC Section {row['section_number']}: {row['section_title']}. Description: {row['description']}"
@@ -75,6 +85,10 @@ class FIRRAGModel:
         if self.knowledge_base is None:
             self.prepare_knowledge_base()
         
+        if not self.knowledge_base:
+            print("❌ No knowledge base available for training")
+            return None
+            
         print("Training FIR embeddings...")
         self.embeddings = self.embedder.encode(self.knowledge_base, convert_to_numpy=True)
         
@@ -83,19 +97,24 @@ class FIRRAGModel:
         with open(save_path, 'wb') as f:
             pickle.dump((self.knowledge_base, self.embeddings), f)
         
-        print(f"FIR embeddings trained and saved to {save_path}")
+        print(f"✅ FIR embeddings trained and saved to {save_path}")
         return self.embeddings
     
     def load_embeddings(self, embeddings_path="models/fir_embeddings.pkl"):
         """Load pre-trained embeddings"""
         try:
+            if not os.path.exists(embeddings_path):
+                print("❌ Embeddings file not found, training new embeddings...")
+                return self.train_embeddings(embeddings_path) is not None
+                
             with open(embeddings_path, 'rb') as f:
                 self.knowledge_base, self.embeddings = pickle.load(f)
             print("✅ FIR embeddings loaded successfully!")
             return True
-        except FileNotFoundError:
-            print("❌ FIR embeddings not found. Please train first.")
-            return False
+        except Exception as e:
+            print(f"❌ Failed to load embeddings: {e}")
+            print("🔄 Training new embeddings...")
+            return self.train_embeddings(embeddings_path) is not None
     
     def search_sections(self, incident_description, top_k=3, threshold=0.4):
         """Search for relevant IPC sections based on incident description"""
@@ -103,6 +122,9 @@ class FIRRAGModel:
             if not self.load_embeddings():
                 return []
         
+        if not self.knowledge_base:
+            return []
+            
         query_embedding = self.embedder.encode([incident_description], convert_to_numpy=True)[0]
         
         # Calculate cosine similarities
@@ -140,6 +162,8 @@ class FIRRAGModel:
         """Get detailed information for specific section numbers"""
         details = []
         for section_num in section_numbers:
+            if self.sections_df.empty:
+                continue
             section_data = self.sections_df[
                 self.sections_df['section_number'].astype(str) == str(section_num)
             ]
@@ -219,42 +243,11 @@ class FIRRAGModel:
         """
         
         try:
-            response = self.client.models.generate_content(
-                model="models/gemini-2.5-flash",
-                contents=prompt,
-                config=GenerateContentConfig(temperature=0.2),
+            model = self.client.GenerativeModel("gemini-2.5-flash")
+            response = model.generate_content(
+                prompt,
+                generation_config=genai.types.GenerationConfig(temperature=0.2)
             )
             return response.text
         except Exception as e:
             return f"AI service error: {str(e)}. Please try basic keyword search or consult legal resources."
-
-# Simple test function
-def test_model():
-    """Test the FIR RAG model"""
-    rag_model = FIRRAGModel("data/section.csv")
-    
-    # Load or train embeddings
-    if not rag_model.load_embeddings():
-        print("Training new embeddings...")
-        rag_model.train_embeddings()
-    
-    # Test queries
-    test_queries = [
-        "Someone stole my phone",
-        "A person threatened me with a knife",
-        "I received a fake job offer"
-    ]
-    
-    for query in test_queries:
-        print(f"\n🔍 Query: {query}")
-        suggestions = rag_model.suggest_sections(query)
-        if suggestions:
-            for section in suggestions[:3]:  # Show top 3
-                print(f"✅ Section {section['section_number']}: {section['section_title']} (Confidence: {section.get('confidence', 0):.2f})")
-        else:
-            print("❌ No sections found. Using fallback...")
-            fallback = rag_model.gemini_fallback(query)
-            print(f"🤖 {fallback}")
-
-if __name__ == "__main__":
-    test_model()
