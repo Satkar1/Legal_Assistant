@@ -82,7 +82,7 @@ class FIRSearch {
 
     // Download FIR
     downloadFIR(firNumber) {
-        const downloadUrl = `http://localhost:5001/api/fir/download/${firNumber.replace(/\//g, '_')}`;
+        const downloadUrl = `/api/fir/download/${firNumber.replace(/\//g, '_')}`;
         window.open(downloadUrl, '_blank');
     }
 
@@ -120,3 +120,4 @@ class FIRSearch {
 // Initialize FIR Search
 
 const firSearch = new FIRSearch();
+
