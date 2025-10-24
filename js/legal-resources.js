@@ -1,7 +1,7 @@
 // Legal Resources Manager
 class LegalResourcesManager {
     constructor() {
-        this.apiBase = 'http://localhost:5001/api/police';
+        this.apiBase = '/api/police';
         this.resources = null;
         this.currentType = 'ipc';
     }
@@ -406,4 +406,5 @@ function downloadProcedure(procedureName) {
 }
 
 // Initialize legal resources manager
+
 window.legalResourcesManager = new LegalResourcesManager();
