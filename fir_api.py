@@ -688,19 +688,57 @@ def download_fir(fir_number):
         except:
             month_name = f"Month_{month}"
         
-        pdf_path = f"fir_drafts/{year}/{month}_{month_name}/{fir_number}.pdf"
+        # Try multiple possible file paths
+        possible_paths = [
+            f"fir_drafts/{year}/{month}_{month_name}/{fir_number}.pdf",
+            f"fir_drafts/{year}/{month}_{month_name}/{actual_fir_number}.pdf",
+            f"fir_drafts/{year}/{month:02d}_{month_name}/{fir_number}.pdf",
+            f"fir_drafts/{year}/{month:02d}_{month_name}/{actual_fir_number}.pdf",
+        ]
         
-        logger.info(f"📥 Download request for: {pdf_path}")
+        pdf_path = None
+        for path in possible_paths:
+            if os.path.exists(path):
+                pdf_path = path
+                break
         
-        if os.path.exists(pdf_path):
-            return send_file(pdf_path, as_attachment=True, download_name=f"FIR_{fir_number}.pdf")
+        if not pdf_path:
+            # Try to find any PDF with this FIR number
+            import glob
+            search_pattern = f"fir_drafts/**/*{fir_number}*.pdf"
+            matches = glob.glob(search_pattern, recursive=True)
+            if matches:
+                pdf_path = matches[0]
+        
+        logger.info(f"📥 Download request for: {fir_number}")
+        logger.info(f"🔍 Looking for PDF at: {pdf_path}")
+        
+        if pdf_path and os.path.exists(pdf_path):
+            # Return the PDF file
+            return send_file(
+                pdf_path, 
+                as_attachment=True, 
+                download_name=f"FIR_{fir_number}.pdf",
+                mimetype='application/pdf'
+            )
         else:
-            logger.error(f"❌ FIR not found: {pdf_path}")
-            return jsonify({'success': False, 'error': 'FIR not found'}), 404
+            logger.error(f"❌ FIR not found: {fir_number}")
+            logger.error(f"🔍 Searched paths: {possible_paths}")
+            
+            # Return a proper JSON error instead of HTML
+            return jsonify({
+                'success': False, 
+                'error': 'FIR PDF not found',
+                'fir_number': fir_number,
+                'searched_paths': possible_paths
+            }), 404
             
     except Exception as e:
         logger.error(f"💥 Download error: {e}")
-        return jsonify({'success': False, 'error': str(e)}), 500
+        return jsonify({
+            'success': False, 
+            'error': f'Download failed: {str(e)}'
+        }), 500
 
 # NEW API ENDPOINTS FOR FIR RETRIEVAL AND SEARCH
 
@@ -1067,4 +1105,5 @@ if __name__ == '__main__':
     
     port = int(os.environ.get('PORT', 5001))
     app.run(host='0.0.0.0', port=port, debug=False)
+
 
