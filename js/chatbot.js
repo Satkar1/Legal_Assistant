@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const userInput = document.getElementById('userInput');
     const sendBtn = document.getElementById('sendBtn');
 
-    const API_URL = 'http://localhost:5000/api/chat';
+    const API_URL = '/api/chat';
 
     async function sendMessage() {
         const message = userInput.value.trim();
@@ -166,3 +166,4 @@ document.addEventListener('DOMContentLoaded', function() {
         if (startBtn) startBtn.disabled = true;
     }
 });
+
