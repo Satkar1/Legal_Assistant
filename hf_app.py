@@ -6,11 +6,15 @@ import traceback
 
 # Create main app
 app = Flask(__name__)
+# Replace the CORS configuration with:
 CORS(app, origins=[
-    "https://*.vercel.app",
-    "https://*.hf.space", 
+    "https://s2004-police-dashboard.hf.space",  # Your HF Space
+    "https://legal-assistance-frontend.vercel.app",  # Your Vercel frontend
     "http://localhost:8000",
-    "http://localhost:3000"
+    "http://localhost:3000",
+    "http://localhost:5000",
+    "http://127.0.0.1:8000",
+    "http://127.0.0.1:3000"
 ], methods=["GET", "POST", "PUT", "DELETE"], allow_headers=["*"])
 
 # Store references to your existing apps
