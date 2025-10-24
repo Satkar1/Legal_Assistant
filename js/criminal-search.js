@@ -1,7 +1,7 @@
 // Criminal Pattern Matching System
 class CriminalSearch {
     constructor() {
-        this.apiBase = 'http://localhost:5001/api/police';
+        this.apiBase = '/api/police';
     }
 
     async findCriminalMatches() {
@@ -152,4 +152,5 @@ function viewCriminalProfile(profileId) {
 
 function flagPotentialMatch(profileId) {
     alert(`Flagging profile ${profileId} as potential match - Implementation needed`);
+
 }
