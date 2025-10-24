@@ -585,11 +585,13 @@ def generate_pdf():
         if not pdf_path or not os.path.exists(pdf_path):
             return jsonify({'success': False, 'error': 'Failed to generate PDF'}), 500
         
-        # Store in Supabase if client is available
+        # Store in Supabase - FIXED VERSION
         db_storage_success = False
+        db_error_message = None
+        
         if supabase_client:
             try:
-                # Prepare data for Supabase storage
+                # Prepare data for Supabase storage - CORRECTED FIELDS
                 supabase_data = {
                     'fir_number': fir_number,
                     'police_station': fir_data['police_station'],
@@ -607,23 +609,48 @@ def generate_pdf():
                     'victim_gender': fir_data['victim_info'].get('gender'),
                     'accused_name': fir_data['accused_info'].get('name'),
                     'accused_description': fir_data['accused_info'].get('description'),
-                    'ipc_sections': json.dumps(fir_data['sections_applied']),
+                    'ipc_sections': json.dumps(fir_data['sections_applied']),  # Store as JSON string
                     'investigating_officer': fir_data['investigating_officer'],
                     'additional_comments': fir_data['additional_comments'],
-                    'pdf_path': pdf_path
+                    'status': 'registered',  # Default status
+                    'pdf_path': pdf_path,
+                    'created_at': datetime.now(timezone.utc).isoformat(),
+                    'updated_at': datetime.now(timezone.utc).isoformat()
                 }
+                
+                # Remove None values to avoid database errors
+                supabase_data = {k: v for k, v in supabase_data.items() if v is not None}
                 
                 storage_result = supabase_client.store_fir_record(supabase_data)
                 db_storage_success = storage_result['success']
                 
                 if db_storage_success:
                     logger.info(f"✅ FIR stored in Supabase with ID: {storage_result.get('id')}")
+                    
+                    # Also create initial activity record
+                    try:
+                        activity_data = {
+                            'fir_number': fir_number,
+                            'activity_type': 'fir_registered',
+                            'title': 'FIR Registered',
+                            'description': f'FIR registered for {fir_data["incident_details"]["type"]} incident',
+                            'officer_name': fir_data['investigating_officer']
+                        }
+                        supabase_client.supabase.table('case_activities').insert(activity_data).execute()
+                        logger.info(f"✅ Initial activity recorded for FIR: {fir_number}")
+                    except Exception as activity_error:
+                        logger.warning(f"⚠️ Could not create initial activity: {activity_error}")
+                        
                 else:
-                    logger.error(f"❌ Failed to store FIR in Supabase: {storage_result.get('error')}")
+                    db_error_message = storage_result.get('error', 'Unknown database error')
+                    logger.error(f"❌ Failed to store FIR in Supabase: {db_error_message}")
                     
             except Exception as db_error:
                 logger.error(f"❌ Database storage error: {db_error}")
                 db_storage_success = False
+                db_error_message = str(db_error)
+        else:
+            logger.warning("⚠️ Supabase client not available for storage")
         
         return jsonify({
             'success': True,
@@ -631,8 +658,8 @@ def generate_pdf():
             'pdf_path': pdf_path,
             'download_url': f'/api/fir/download/{fir_number.replace("/", "_")}',
             'stored_in_db': db_storage_success,
-            'db_error': not db_storage_success and supabase_client is not None,
-            'message': 'FIR generated successfully' + (' and stored in database' if db_storage_success else '')
+            'db_error': db_error_message if not db_storage_success else None,
+            'message': 'FIR generated successfully' + (' and stored in database' if db_storage_success else ' (database storage failed)')
         })
         
     except Exception as e:
@@ -1040,3 +1067,4 @@ if __name__ == '__main__':
     
     port = int(os.environ.get('PORT', 5001))
     app.run(host='0.0.0.0', port=port, debug=False)
+
