@@ -6,7 +6,12 @@ import traceback
 
 # Create main app
 app = Flask(__name__)
-CORS(app)
+CORS(app, origins=[
+    "https://*.vercel.app",
+    "https://*.hf.space", 
+    "http://localhost:8000",
+    "http://localhost:3000"
+], methods=["GET", "POST", "PUT", "DELETE"], allow_headers=["*"])
 
 # Store references to your existing apps
 fir_app = None
