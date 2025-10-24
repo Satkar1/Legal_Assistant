@@ -152,13 +152,17 @@ def login_user():
 # --- Load RAG ---
 answer_query = None
 try:
+    # Try to import with error handling
     from scripts.query import answer_query
     print("✅ RAG system loaded successfully.")
 except Exception as e:
-    print("⚠️ Could not import RAG system:", e)
-    answer_query = None
+    print(f"⚠️ Could not import RAG system: {e}")
+    # Create a fallback function
+    def answer_query_fallback(query):
+        return f"RAG system temporarily unavailable. Original query: {query}"
+    answer_query = answer_query_fallback
 
-
+    
 # --- Configure Gemini ---
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 genai = None
@@ -203,13 +207,10 @@ def call_gemini_for_legal_check_and_answer(user_query: str):
 
     prompt = f"""
 You are a legal AI assistant for Indian police and legal professionals.
-
 1️⃣ If the user's question is related to **law, legal procedure, IPC sections, evidence, FIR, bail, or court process**, 
 then answer factually and concisely, referencing relevant IPC sections or legal procedures.
-
 2️⃣ If the user's question is **not legal** (general chit-chat, emotional, non-law topic), 
 reply EXACTLY with this token: NOT_A_LEGAL_QUERY
-
 User question: "{user_query}"
     """.strip()
 
@@ -288,4 +289,5 @@ def health():
 
 if __name__ == "__main__":
     print("🚀 Starting Legal Chatbot API (Hybrid RAG + Gemini with Auto-detect)...")
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port, debug=False)
