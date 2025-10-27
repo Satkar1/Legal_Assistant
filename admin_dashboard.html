@@ -38,27 +38,11 @@
       color: red;
       font-weight: bold;
     }
-    .logout-btn {
-      float: right;
-      background: #dc3545;
-      color: white;
-      border: none;
-      padding: 6px 14px;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-    .logout-btn:hover {
-      background: #b52a38;
-    }
   </style>
 </head>
 <body>
   <div class="container">
     <h2 class="mb-4 text-center">👮 Admin Panel - Police Verification</h2>
-
-    <div class="text-center mb-3">
-      <button class="logout-btn" onclick="logout()">Logout</button>
-    </div>
 
     <table class="table table-bordered" id="policeTable">
       <thead class="table-dark">
@@ -78,39 +62,15 @@
   </div>
 
   <script>
-    // ================= CONFIG =================
-    const HF_API_BASE = "https://s2004-police-dashboard.hf.space"; // your Hugging Face backend URL
+    // ✅ Your Hugging Face backend base URL
+    const BACKEND_URL = "https://s2004-police-dashboard.hf.space";
 
-    // Optional: simple admin session
-    function ensureLogin() {
-      const code = sessionStorage.getItem("admin_code");
-      if (!code) {
-        const entered = prompt("Enter admin verification code:");
-        if (!entered) {
-          alert("Access denied.");
-          window.location.href = "/";
-          return;
-        }
-        sessionStorage.setItem("admin_code", entered);
-      }
-    }
-
-    function logout() {
-      sessionStorage.removeItem("admin_code");
-      alert("Logged out successfully!");
-      window.location.reload();
-    }
-
-    // ================= FETCH POLICE USERS =================
     async function fetchPoliceUsers() {
-      ensureLogin();
-      const tableBody = document.getElementById("tableBody");
-      tableBody.innerHTML = `<tr><td colspan="6" class="text-center">Loading...</td></tr>`;
-
       try {
-        const response = await fetch('https://s2004-police-dashboard.hf.space/api/get-police-users');
+        const response = await fetch(`${BACKEND_URL}/api/get-police-users`);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const data = await response.json();
-
+        const tableBody = document.getElementById('tableBody');
         tableBody.innerHTML = "";
 
         if (!data.length) {
@@ -119,7 +79,7 @@
         }
 
         data.forEach(user => {
-          const row = document.createElement("tr");
+          const row = document.createElement('tr');
           row.innerHTML = `
             <td>${user.full_name || '-'}</td>
             <td>${user.email}</td>
@@ -131,7 +91,7 @@
                 : '<span class="not-verified">Not Verified</span>'}
             </td>
             <td>
-              <button class="verify-btn" onclick="toggleVerification('${user.email}', ${user.is_verified})">
+              <button class="verify-btn" onclick="toggleVerification('${user.email}')">
                 ${user.is_verified ? 'Unverify' : 'Verify'}
               </button>
             </td>
@@ -140,39 +100,24 @@
         });
       } catch (err) {
         console.error(err);
-        tableBody.innerHTML = `<tr><td colspan="6" class="text-center text-danger">Failed to load users.</td></tr>`;
+        alert("Failed to load users. Check if backend is online.");
       }
     }
 
-    // ================= TOGGLE VERIFICATION =================
-    async function toggleVerification(email, currentStatus) {
-      const code = sessionStorage.getItem("admin_code");
-      if (!code) {
-        alert("Please log in again.");
-        sessionStorage.removeItem("admin_code");
-        window.location.reload();
-        return;
-      }
-
-      const confirmAction = confirm(
-        `Are you sure you want to ${currentStatus ? "UNVERIFY" : "VERIFY"} this officer?`
-      );
-      if (!confirmAction) return;
+    async function toggleVerification(email) {
+      const code = prompt("Enter admin verification code:");
+      if (!code) return;
 
       try {
-        const response = await fetch('https://s2004-police-dashboard.hf.space/api/toggle-verify', {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
+        const response = await fetch(`${BACKEND_URL}/api/toggle-verify`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email, code })
         });
 
         const result = await response.json();
-        if (result.success) {
-          alert(result.message);
-          fetchPoliceUsers(); // Refresh
-        } else {
-          alert(result.error || "Operation failed.");
-        }
+        alert(result.message || result.error);
+        fetchPoliceUsers(); // Refresh table
       } catch (err) {
         alert("Error verifying user.");
         console.error(err);
@@ -184,4 +129,3 @@
   </script>
 </body>
 </html>
-
