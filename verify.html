@@ -4,30 +4,46 @@
     <meta charset="utf-8" />
     <title>Police Verification</title>
     <style>
-      body { font-family: Arial; text-align: center; margin-top: 100px; }
+      body {
+        font-family: Arial, sans-serif;
+        text-align: center;
+        margin-top: 100px;
+        color: #333;
+      }
       .ok { color: #4caf50; }
       .err { color: #d32f2f; }
     </style>
   </head>
   <body>
     <h2>Verifying officer, please wait...</h2>
+
     <script>
       const token = new URLSearchParams(window.location.search).get("token");
-      fetch(`/api/verify-police?token=${token}`)
-        .then(r => r.json())
-        .then(data => {
-          if (data.success) {
+      if (!token) {
+        document.body.innerHTML =
+          `<h2 class="err">❌ Invalid verification link</h2><p>No token provided.</p>`;
+      } else {
+        fetch(`https://s2004-police-dashboard.hf.space/api/verify-police?token=${token}`)
+          .then(response => {
+            if (!response.ok) {
+              throw new Error(`Server responded with ${response.status}`);
+            }
+            return response.json();
+          })
+          .then(data => {
+            if (data.success) {
+              document.body.innerHTML =
+                `<h2 class="ok">✅ ${data.message}</h2>`;
+            } else {
+              document.body.innerHTML =
+                `<h2 class="err">❌ ${data.error || "Verification failed"}</h2><p>${data.message || ""}</p>`;
+            }
+          })
+          .catch(err => {
             document.body.innerHTML =
-              `<h2 class="ok">✅ ${data.message}</h2>`;
-          } else {
-            document.body.innerHTML =
-              `<h2 class="err">❌ ${data.error || "Verification failed"}</h2><p>${data.message || ""}</p>`;
-          }
-        })
-        .catch(err => {
-          document.body.innerHTML =
-            `<h2 class="err">💥 Network Error</h2><p>${err}</p>`;
-        });
+              `<h2 class="err">💥 Network Error</h2><p>${err}</p>`;
+          });
+      }
     </script>
   </body>
 </html>
