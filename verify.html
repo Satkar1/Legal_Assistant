@@ -19,17 +19,17 @@
 
     <script>
       const token = new URLSearchParams(window.location.search).get("token");
+    
       if (!token) {
-        document.body.innerHTML =
-          `<h2 class="err">❌ Invalid verification link</h2><p>No token provided.</p>`;
+        document.body.innerHTML = `
+          <h2 class="err">❌ Invalid verification link</h2>
+          <p>No token provided.</p>`;
       } else {
+        document.body.innerHTML = `<h2>Verifying officer, please wait...</h2>`;
+    
+        // ✅ Use full Hugging Face API URL
         fetch(`https://s2004-police-dashboard.hf.space/api/verify-police?token=${token}`)
-          .then(response => {
-            if (!response.ok) {
-              throw new Error(`Server responded with ${response.status}`);
-            }
-            return response.json();
-          })
+          .then(r => r.json())
           .then(data => {
             if (data.success) {
               document.body.innerHTML =
@@ -45,5 +45,6 @@
           });
       }
     </script>
+
   </body>
 </html>
