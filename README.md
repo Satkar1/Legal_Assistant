@@ -81,25 +81,6 @@ The system is fully deployed using **Vercel (Frontend)** and **HuggingFace Space
 
 ![Architecture Diagram](./assets/SystemArchitecture.png)
 
-```
-Citizen / Police / Admin
-       │
-       ▼
-Frontend (Vercel) — HTML/CSS/JS
-       │
-       ▼
-Backend API (Flask on HuggingFace)
-       │                 ┌─────────── Gemini API
-       ├── Chatbot API ──┤
-       │                 └─────────── RAG Embedding Search
-       │
-       ├── FIR API
-       │
-       └── Auth + Verification API
-       ▼
-Supabase Database (Users, FIR, Chats, Embeddings)
-```
-
 ---
 
 # 🧬 **System Workflows**
