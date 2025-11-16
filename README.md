@@ -163,36 +163,6 @@ The system is fully deployed using **Vercel (Frontend)** and **HuggingFace Space
 
 ---
 
-# 📁 **Folder Structure (Recommended)**
-
-```
-Legal_Assistant/
-│
-├── frontend/
-│   ├── index.html
-│   ├── admin_dashboard.html
-│   ├── citizen-dashboard.html
-│   ├── police-dashboard.html
-│   ├── ...
-│
-├── backend/
-│   ├── app.py
-│   ├── hf_app.py
-│   ├── fir_api.py
-│   ├── chatbot_api.py
-│   ├── scripts/
-│   │   ├── query.py
-│   │   └── embeddings.pkl
-│   └── ...
-│
-├── assets/
-│   ├── screenshots/
-│   ├── diagrams/
-│
-└── README.md
-```
-
----
 
 # 🔌 **API Endpoints Overview**
 
