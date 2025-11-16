@@ -79,7 +79,7 @@ The system is fully deployed using **Vercel (Frontend)** and **HuggingFace Space
 
 ## **High-Level Architecture Diagram**
 
-![Architecture Diagram](./assets/SystemArchitecture (1).png)
+![Architecture Diagram](./assets/SystemArchitecture.png)
 
 ```
 Citizen / Police / Admin
